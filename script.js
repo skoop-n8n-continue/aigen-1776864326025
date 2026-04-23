@@ -6,6 +6,7 @@ let spiders = [];
 let spiderBots = [];
 let webs = [];
 let webStrands = [];
+let webShots = [];
 let buildings = [];
 let pulses = [];
 let glitchTimer = 0;
@@ -119,6 +120,47 @@ class WebStrand {
     }
 }
 
+class WebShot {
+    constructor(startX, startY, endX, endY) {
+        this.startX = startX;
+        this.startY = startY;
+        this.endX = endX;
+        this.endY = endY;
+        this.progress = 0;
+        this.speed = 0.15;
+        this.opacity = 1;
+        this.life = 1;
+    }
+
+    update() {
+        if (this.progress < 1) {
+            this.progress += this.speed;
+        } else {
+            this.life -= 0.02;
+        }
+        return this.life > 0;
+    }
+
+    draw() {
+        ctx.strokeStyle = `rgba(255, 255, 255, ${this.life * 0.8})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.startX, this.startY);
+        const currentX = this.startX + (this.endX - this.startX) * this.progress;
+        const currentY = this.startY + (this.endY - this.startY) * this.progress;
+        ctx.lineTo(currentX, currentY);
+        ctx.stroke();
+
+        // Web impact at end
+        if (this.progress >= 0.95) {
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.life * 0.5})`;
+            ctx.beginPath();
+            ctx.arc(this.endX, this.endY, 10 * (1 - this.life + 1), 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+}
+
 class Spider {
     constructor() {
         this.reset();
@@ -150,11 +192,35 @@ class Spider {
             this.y += Math.sin(this.angle) * this.speed;
         }
 
+        // Randomly "do web" - shoot a web or spin one
+        if (Math.random() > 0.985) {
+            this.shootWeb();
+        }
+        if (Math.random() > 0.995) {
+            this.spinWeb();
+        }
+
         if (this.x < -300 || this.x > width + 300 || this.y < -300 || this.y > height + 300) {
             this.reset();
         }
 
         this.legPhase += 0.35;
+    }
+
+    shootWeb() {
+        const targetX = Math.random() * width;
+        const targetY = Math.random() * height;
+        webShots.push(new WebShot(this.x, this.y, targetX, targetY));
+    }
+
+    spinWeb() {
+        webs.push({
+            x: this.x,
+            y: this.y,
+            radius: Math.random() * 150 + 100,
+            opacity: Math.random() * 0.15 + 0.05
+        });
+        if (webs.length > 20) webs.shift(); // Keep web count manageable
     }
 
     draw() {
@@ -454,6 +520,12 @@ function animate() {
     webStrands.forEach(strand => {
         strand.update();
         strand.draw();
+    });
+
+    webShots = webShots.filter(shot => {
+        const active = shot.update();
+        if (active) shot.draw();
+        return active;
     });
 
     spiders.forEach(spider => {
