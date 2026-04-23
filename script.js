@@ -3,6 +3,7 @@ const ctx = canvas.getContext('2d');
 
 let width, height;
 let spiders = [];
+let ladybugs = [];
 let webs = [];
 
 function resize() {
@@ -103,9 +104,128 @@ class Spider {
     }
 }
 
+class Ladybug {
+    constructor() {
+        this.reset();
+    }
+
+    reset() {
+        this.x = Math.random() * width;
+        this.y = Math.random() * height;
+        this.size = Math.random() * 4 + 4;
+        this.angle = Math.random() * Math.PI * 2;
+        this.speed = Math.random() * 0.4 + 0.3;
+        this.turnSpeed = (Math.random() - 0.5) * 0.03;
+        this.legPhase = 0;
+        this.color = '#00b7af'; // Primary teal
+        this.spotColor = '#10181f'; // Dark navy for spots
+    }
+
+    update() {
+        this.angle += this.turnSpeed;
+        this.x += Math.cos(this.angle) * this.speed;
+        this.y += Math.sin(this.angle) * this.speed;
+
+        if (this.x < -50 || this.x > width + 50 || this.y < -50 || this.y > height + 50) {
+            this.reset();
+        }
+
+        this.legPhase += 0.15;
+    }
+
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+
+        // Legs (6 legs)
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 1.2;
+        for (let i = 0; i < 3; i++) {
+            const sideAngle = (i - 1) * 0.6;
+            this.drawLeg(1, sideAngle, i);
+            this.drawLeg(-1, sideAngle, i);
+        }
+
+        // Body (round)
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(0, 0, this.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Elytra line (wing covers)
+        ctx.strokeStyle = this.spotColor;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(-this.size, 0);
+        ctx.lineTo(this.size, 0);
+        ctx.stroke();
+
+        // Spots
+        ctx.fillStyle = this.spotColor;
+        const spotRadius = this.size * 0.15;
+        const spotOffset = this.size * 0.5;
+
+        // Center spot
+        this.drawSpot(0, 0, spotRadius);
+
+        // Side spots
+        this.drawSpot(spotOffset, spotOffset, spotRadius);
+        this.drawSpot(spotOffset, -spotOffset, spotRadius);
+        this.drawSpot(-spotOffset, spotOffset, spotRadius);
+        this.drawSpot(-spotOffset, -spotOffset, spotRadius);
+
+        // Head
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.size * 0.8, 0, this.size * 0.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Antennae
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(this.size * 1.1, this.size * 0.2);
+        ctx.quadraticCurveTo(this.size * 1.5, this.size * 0.5, this.size * 1.6, this.size * 0.3);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(this.size * 1.1, -this.size * 0.2);
+        ctx.quadraticCurveTo(this.size * 1.5, -this.size * 0.5, this.size * 1.6, -this.size * 0.3);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    drawSpot(x, y, r) {
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    drawLeg(side, sideAngle, index) {
+        const movement = Math.sin(this.legPhase + index) * 0.2;
+        const baseAngle = (side > 0 ? -Math.PI / 2 : Math.PI / 2) + sideAngle + movement;
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+
+        const legLen = this.size * 1.5;
+        const x1 = Math.cos(baseAngle) * legLen;
+        const y1 = Math.sin(baseAngle) * legLen;
+
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+    }
+}
+
 // Initialize spiders
 for (let i = 0; i < 15; i++) {
     spiders.push(new Spider());
+}
+
+// Initialize ladybugs
+for (let i = 0; i < 10; i++) {
+    ladybugs.push(new Ladybug());
 }
 
 function drawWeb(web) {
@@ -145,6 +265,11 @@ function animate() {
     spiders.forEach(spider => {
         spider.update();
         spider.draw();
+    });
+
+    ladybugs.forEach(ladybug => {
+        ladybug.update();
+        ladybug.draw();
     });
 
     requestAnimationFrame(animate);
