@@ -11,12 +11,17 @@ let pulses = [];
 let glitchTimer = 0;
 
 const SPIDEY_VARIANTS = [
-    { name: 'Peter', body: '#E23636', detail: '#005BEA', eye: '#ffffff', leg: '#E23636' },
-    { name: 'Miles', body: '#1a1a1a', detail: '#E23636', eye: '#ffffff', leg: '#1a1a1a' },
-    { name: 'Gwen', body: '#ffffff', detail: '#e91e63', eye: '#00b7af', leg: '#ffffff' },
-    { name: '2099', body: '#002654', detail: '#E23636', eye: '#E23636', leg: '#002654' },
-    { name: 'Noir', body: '#000000', detail: '#333333', eye: '#ffffff', leg: '#1a1a1a' },
-    { name: 'Ham', body: '#ff80ab', detail: '#E23636', eye: '#ffffff', leg: '#ff80ab' }
+    { name: 'Peter', body: '#ff0000', detail: '#0000ff', eye: '#ffffff', leg: '#ff0000' },
+    { name: 'Miles', body: '#050505', detail: '#ff0000', eye: '#ffffff', leg: '#050505' },
+    { name: 'Gwen', body: '#ffffff', detail: '#ff4081', eye: '#00bcd4', leg: '#ffffff' },
+    { name: '2099', body: '#001a3d', detail: '#ff0000', eye: '#ff0000', leg: '#001a3d' },
+    { name: 'Noir', body: '#000000', detail: '#222222', eye: '#ffffff', leg: '#000000' },
+    { name: 'Ham', body: '#ff80ab', detail: '#ff0000', eye: '#ffffff', leg: '#ff80ab' },
+    { name: 'Symbiote', body: '#000000', detail: '#ffffff', eye: '#ffffff', leg: '#000000' },
+    { name: 'Superior', body: '#ff0000', detail: '#000000', eye: '#ffffff', leg: '#000000' },
+    { name: 'IronSpider', body: '#d4af37', detail: '#ff0000', eye: '#ffffff', leg: '#d4af37' },
+    { name: 'Scarlet', body: '#ff0000', detail: '#0066ff', eye: '#ffffff', leg: '#ff0000' },
+    { name: 'Punk', body: '#ff0000', detail: '#333333', eye: '#ffffff', leg: '#ff0000' }
 ];
 
 function resize() {
