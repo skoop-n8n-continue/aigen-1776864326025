@@ -5,11 +5,13 @@ let width, height;
 let spiders = [];
 let ladybugs = [];
 let webs = [];
+let rainDrops = [];
 
 function resize() {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
     generateWebs();
+    generateRain();
 }
 
 function generateWebs() {
@@ -24,8 +26,46 @@ function generateWebs() {
     }
 }
 
+function generateRain() {
+    rainDrops = [];
+    const count = Math.floor(width / 10);
+    for (let i = 0; i < count; i++) {
+        rainDrops.push(new RainDrop());
+    }
+}
+
 window.addEventListener('resize', resize);
-resize();
+
+class RainDrop {
+    constructor() {
+        this.reset();
+        this.y = Math.random() * height; // Start at random Y initially
+    }
+
+    reset() {
+        this.x = Math.random() * width;
+        this.y = -Math.random() * 100;
+        this.length = Math.random() * 20 + 10;
+        this.speed = Math.random() * 15 + 10;
+        this.opacity = Math.random() * 0.2 + 0.05;
+    }
+
+    update() {
+        this.y += this.speed;
+        if (this.y > height) {
+            this.reset();
+        }
+    }
+
+    draw() {
+        ctx.strokeStyle = `rgba(0, 183, 175, ${this.opacity})`; // Teal rain
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x, this.y + this.length);
+        ctx.stroke();
+    }
+}
 
 class Spider {
     constructor() {
@@ -40,7 +80,8 @@ class Spider {
         this.speed = Math.random() * 0.5 + 0.2;
         this.turnSpeed = (Math.random() - 0.5) * 0.02;
         this.legPhase = 0;
-        this.color = '#00b7af';
+        this.color = '#00b7af'; // Primary teal
+        this.isRedback = Math.random() > 0.8;
     }
 
     update() {
@@ -66,7 +107,16 @@ class Spider {
         ctx.ellipse(0, 0, this.size * 1.2, this.size, 0, 0, Math.PI * 2);
         ctx.fill();
 
+        // Redback stripe
+        if (this.isRedback) {
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.rect(-this.size * 0.2, -this.size * 0.8, this.size * 0.4, this.size * 1.6);
+            ctx.fill();
+        }
+
         // Head
+        ctx.fillStyle = this.color;
         ctx.beginPath();
         ctx.arc(this.size * 1, 0, this.size * 0.6, 0, Math.PI * 2);
         ctx.fill();
@@ -117,7 +167,7 @@ class Ladybug {
         this.speed = Math.random() * 0.4 + 0.3;
         this.turnSpeed = (Math.random() - 0.5) * 0.03;
         this.legPhase = 0;
-        this.color = '#00b7af'; // Primary teal
+        this.color = '#ff4d4d'; // Now Red!
         this.spotColor = '#10181f'; // Dark navy for spots
     }
 
@@ -228,6 +278,9 @@ for (let i = 0; i < 10; i++) {
     ladybugs.push(new Ladybug());
 }
 
+// Set up initial state
+resize();
+
 function drawWeb(web) {
     ctx.strokeStyle = `rgba(106, 112, 113, ${web.opacity})`;
     ctx.lineWidth = 1;
@@ -270,6 +323,11 @@ function animate() {
     ladybugs.forEach(ladybug => {
         ladybug.update();
         ladybug.draw();
+    });
+
+    rainDrops.forEach(drop => {
+        drop.update();
+        drop.draw();
     });
 
     requestAnimationFrame(animate);
